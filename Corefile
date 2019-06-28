@@ -1,0 +1,10 @@
+. {
+  etcd mymin.io {
+      endpoint http://etcd:2379
+      upstream /etc/resolv.conf
+  }
+  debug
+  cache 160 mymin.io
+  loadbalance
+  forward . /etc/resolv.conf
+}

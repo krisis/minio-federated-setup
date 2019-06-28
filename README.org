@@ -1,0 +1,58 @@
+* MinIO Federated setup
+** Use case
+- [ ] Used in large scale deployments to compose/stitch together multiple MinIO deployments
+- [ ] Usually applications access objects using virtual host style
+
+
+** Demo setup description
+- [ ] 2 MinIO FS backend servers
+
+- [ ] Etcd container for storing DNS SRV records
+
+- [ ] Coredns for resolving buckets to the appropriate MinIO deployment
+
+- [ ]  MINIO_ETCD_ENDPOINTS=http://etcd:2379
+  Address to etcd service holding DNS SRV records
+
+- [ ] MINIO_PUBLIC_IPS=cluster1/cluster2
+  Name of service that resolves to the minio container
+
+- [ ] MINIO_DOMAIN=mymin.io
+
+- [ ] Corefile - describes for what domain names it consults etcd for
+  SRV records
+
+
+** Demo
+*** Setup
+- [ ] Start the federation setup
+  docker-compose up -d // I want my terminal back!
+
+- [ ] Find the coredns container's ip
+  docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $INSTANCE_ID
+
+- [ ] Create buckets on cluster1 and cluster2 using mc
+  Typically, this is an IT admin/Storage admin operation.
+
+  mc config host add cluster1 http://cluster1:9000 minio minio123
+
+  mc config host add cluster2 http://cluster2:9000 minio minio123
+
+
+*** Execution
+- [ ] Run the aws-cli container image
+  docker run --rm -it --dns $COREDNS_IP --network federated-setup_fed -v $PWD/aws-config:/root/.aws/config --entrypoint /bin/sh  mesosphere/aws-cli
+
+- [ ] List objects in bucket1 using virtual host style
+  aws --endpoint-url http://mymin.io:9000 s3 ls s3://bucket1
+
+- [ ] Upload an object to bucket1
+  aws --endpoint-url http://mymin.io:9000 s3 cp /etc/hosts s3://bucket1/obj1
+
+*** Bonus
+- [ ] How to look at bucket DNS entries on etcd?
+  - Get into the etcd container (for demo convenience)
+  docker exec -it federated-setup_etcd_1 /bin/sh
+
+  - List the bucket DNS entries ...
+  ETCDCTL_API=3 etcdctl get --prefix /skydns

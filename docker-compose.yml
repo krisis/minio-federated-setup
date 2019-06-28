@@ -1,0 +1,66 @@
+version: '3.7'
+
+services:
+  cluster1:
+    image: "minio/minio:latest"
+    entrypoint: minio server /disk
+    ports:
+      - "9001:9000"
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+      - MINIO_ETCD_ENDPOINTS=http://etcd:2379
+      - MINIO_PUBLIC_IPS=cluster1
+      - MINIO_DOMAIN=mymin.io
+    depends_on:
+      - "etcd"
+    networks:
+      - fed
+
+  cluster2:
+    image: "minio/minio:latest"
+    entrypoint: minio server /disk
+    ports:
+      - "9002:9000"
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+      - MINIO_ETCD_ENDPOINTS=http://etcd:2379
+      - MINIO_PUBLIC_IPS=cluster2
+      - MINIO_DOMAIN=mymin.io
+    depends_on:
+      - "etcd"
+    networks:
+      - fed
+
+  coredns:
+    image: "coredns/coredns"
+    command:
+      - -conf
+      - /Corefile
+    volumes:
+      - ./Corefile:/Corefile
+    networks:
+      - fed
+    depends_on:
+      - "etcd"
+
+  etcd:
+    image: "quay.io/coreos/etcd"
+    environment:
+      - ETCD_NAME=node0
+      - ETCDCTL_API=3
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER=node0=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    networks:
+      - fed
+
+
+networks:
+  fed:
+    driver: bridge

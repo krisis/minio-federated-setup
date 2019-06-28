@@ -2,7 +2,7 @@
 ** Use case
 - Used in large scale deployments to compose/stitch together multiple MinIO deployments
 - Usually applications access objects using virtual host style
-
+- For more information, see https://docs.min.io/docs/minio-federation-quickstart-guide.html
 
 ** Demo setup description
 - 2 MinIO FS backend servers

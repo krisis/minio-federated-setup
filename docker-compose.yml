@@ -47,6 +47,8 @@ services:
 
   etcd:
     image: "quay.io/coreos/etcd"
+    ports:
+      - "2379:2379"
     environment:
       - ETCD_NAME=node0
       - ETCDCTL_API=3

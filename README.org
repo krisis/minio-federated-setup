@@ -39,7 +39,7 @@
   Typically, this is an IT admin/Storage admin operation.
 
   #+BEGIN_SRC sh
-  docker run --rm -it --dns 172.21.0.4 --network federated-setup_fed --entrypoint /bin/sh minio/mc
+  docker run --rm -it --dns 172.21.0.4 --network minio-federated-setup_fed --entrypoint /bin/sh minio/mc
 
   mc config host add cluster1 http://cluster1:9000 minio minio123
 
@@ -53,7 +53,7 @@
 *** Execution
 - Run the aws-cli container image
   #+BEGIN_SRC sh
-  docker run --rm -it --dns $COREDNS_IP --network federated-setup_fed -v $PWD/aws-config:/root/.aws/config --entrypoint /bin/sh  mesosphere/aws-cli
+  docker run --rm -it --dns $COREDNS_IP --network minio-federated-setup_fed -v $PWD/aws-config:/root/.aws/config --entrypoint /bin/sh  mesosphere/aws-cli
   #+END_SRC
 
 - List objects in bucket1 using virtual host style
@@ -70,10 +70,11 @@
 - How to look at bucket DNS entries on etcd?
   - Get into the etcd container (for demo convenience)
   #+BEGIN_SRC sh
-  docker exec -it federated-setup_etcd_1 /bin/sh
+  docker exec -it minio-federated-setup_etcd_1 /bin/sh
   #+END_SRC
 
   - List the bucket DNS entries ...
   #+BEGIN_SRC sh
   ETCDCTL_API=3 etcdctl get --prefix /skydns
   #+END_SRC
+  
